@@ -1,38 +1,52 @@
 package com.example.jasperreportapp.controller;
 
-import com.example.jasperreportapp.service.ReportService;
-import net.sf.jasperreports.engine.JRException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.jasperreportapp.model.Actor;
+import com.example.jasperreportapp.repository.ActorRepository;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("/reports")
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Controller
 public class ReportController {
 
-    @Autowired
-    private ReportService reportService;
+    private final ActorRepository actorRepository;
 
-    @GetMapping("/actors/pdf")
-    public ResponseEntity<byte[]> generateActorsReportPdf() {
-        try {
-            byte[] pdfBytes = reportService.generateActorReportPdf();
+    public ReportController(ActorRepository actorRepository) {
+        this.actorRepository = actorRepository;
+    }
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("filename", "actors_report.pdf");
-            headers.setContentLength(pdfBytes.length);
+ 
 
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(pdfBytes);
+    @GetMapping("/generate-report")
+    public ResponseEntity<byte[]> generateReport() throws Exception {
+        List<Actor> actors = actorRepository.findAll();
 
-        } catch (JRException e) {
-            return ResponseEntity.status(500).body(("Error al generar el reporte: " + e.getMessage()).getBytes());
-        }
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(actors);
+
+        InputStream jasperStream = new ClassPathResource("reports/actor_report.jrxml").getInputStream();
+        JasperReport jasperReport = JasperCompileManager.compileReport(jasperStream);
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("CreatedBy", "Spring Boot App");
+
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, parameters, dataSource);
+
+        byte[] reportBytes = JasperExportManager.exportReportToPdf(jasperPrint);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("inline", "actor_report.pdf");
+
+        return ResponseEntity.ok().headers(headers).body(reportBytes);
     }
 }
