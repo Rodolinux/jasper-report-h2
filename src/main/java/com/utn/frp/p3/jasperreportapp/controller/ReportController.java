@@ -1,7 +1,5 @@
-package com.example.jasperreportapp.controller;
+package com.utn.frp.p3.jasperreportapp.controller;
 
-import com.example.jasperreportapp.model.Actor;
-import com.example.jasperreportapp.repository.ActorRepository;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.springframework.core.io.ClassPathResource;
@@ -10,6 +8,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import com.utn.frp.p3.jasperreportapp.model.Actor;
+import com.utn.frp.p3.jasperreportapp.repository.ActorRepository;
 
 import java.io.InputStream;
 import java.util.HashMap;

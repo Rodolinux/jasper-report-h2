@@ -8,7 +8,7 @@
 		<version>3.3.12</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.example</groupId>
+	<groupId>com.utn.frp.p3</groupId>
 	<artifactId>jasper-report-app</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>jasper-report-app</name>
